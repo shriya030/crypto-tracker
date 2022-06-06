@@ -71,6 +71,7 @@ function CoinsTable() {
 
   useEffect(() => {
     fetchCoins();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currency]);
 
   console.log(coins);

@@ -6,21 +6,34 @@ import axios from "axios";
 import { makeStyles } from "@mui/styles";
 import CoinInfo from "../Components/CoinInfo";
 import { Typography } from "@mui/material";
-import parse from "html-react-parser";
+import ReactHtmlParser from "react-html-parser";
+import { LinearProgress } from "@mui/material";
+import { createTheme } from "@mui/material";
 import "../App.css";
-import numberWithCommas from "../Components/Banner/Carousel";
+
+const theme = createTheme({
+  breakpoints: {
+    values: {
+      xs: 440,
+      sm: 740,
+      md: 960,
+      lg: 1280,
+      xl: 1920
+    }
+  }
+});
 
 const useStyles = makeStyles({
   container: {
     display: "flex",
-    "@media (max-width: 900px)": {
+    [theme.breakpoints.down("md")]: {
       flexDirection: "column",
       alignItems: "center"
     }
   },
   sidebar: {
     width: "30%",
-    "@media (max-width: 900px)": {
+    [theme.breakpoints.down("md")]: {
       width: "100%"
     },
     display: "flex",
@@ -40,25 +53,50 @@ const useStyles = makeStyles({
     paddingBottom: 15,
     paddingTop: 0,
     textAlign: "justify"
+  },
+  marketData: {
+    alignSelf: "start",
+    padding: 25,
+    paddingTop: 10,
+    width: "100%",
+    // Responsive
+    [theme.breakpoints.down("md")]: {
+      display: "flex",
+      justifyContent: "space-around"
+    },
+    [theme.breakpoints.down("sm")]: {
+      flexDirection: "column",
+      alignItems: "center"
+    },
+    [theme.breakpoints.down("xs")]: {
+      alignItems: "start"
+    }
   }
 });
 
 function CoinPage() {
   const { id } = useParams(); // Only variable that is there in our url
-  const [coin, setCoin] = useState("");
+
+  // const { id } = useParams();
+  const [coin, setCoin] = useState();
+  // console.log(coin);
+
   const { currency, symbol } = CryptoState();
 
   const fetchCoin = async () => {
     const { data } = await axios.get(SingleCoin(id));
+
     setCoin(data);
   };
 
   useEffect(() => {
     fetchCoin();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const classes = useStyles();
-  console.log(coin);
+
+  if (!coin) return <LinearProgress style={{ backgroundColor: "gold" }} />;
   return (
     <div className={classes.container}>
       <div className={classes.sidebar}>
@@ -82,7 +120,7 @@ function CoinPage() {
           className={classes.description}
           style={{ fontFamily: "Montserrat" }}
         >
-          {parse(coin?.description.en.split(". ")[0])}
+          {ReactHtmlParser(coin?.description.en.split(". ")[0])}.
         </Typography>
         <div className={classes.marketData}>
           <span style={{ display: "flex" }}>
@@ -104,11 +142,19 @@ function CoinPage() {
               className={classes.heading}
               style={{ fontFamily: "Montserrat", fontWeight: "bold" }}
             >
-              Curernt Price:
+              Current Price:
             </Typography>
             &nbsp; &nbsp;
-            <Typography variant="h5" style={{ fontFamily: "Montserrat" }}>
-              {symbol} {numberWithCommas(coin.current_price)}
+            <Typography
+              variant="h5"
+              style={{
+                fontFamily: "Montserrat"
+              }}
+            >
+              {symbol}{" "}
+              {coin?.market_data.current_price[
+                currency.toLowerCase()
+              ].toLocaleString("en-US")}
             </Typography>
           </span>
           <span style={{ display: "flex" }}>
@@ -117,11 +163,20 @@ function CoinPage() {
               className={classes.heading}
               style={{ fontFamily: "Montserrat", fontWeight: "bold" }}
             >
-              Rank:
+              Market Cap:
             </Typography>
             &nbsp; &nbsp;
-            <Typography variant="h5" style={{ fontFamily: "Montserrat" }}>
-              {coin?.market_cap_rank}
+            <Typography
+              variant="h5"
+              style={{
+                fontFamily: "Montserrat"
+              }}
+            >
+              {coin?.market_data.market_cap[currency.toLowerCase()]
+                .toLocaleString("en-US")
+
+                .slice(0, -6)}
+              M
             </Typography>
           </span>
         </div>

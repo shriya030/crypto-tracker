@@ -14,13 +14,12 @@ const useStyles = makeStyles({
   },
   carouselItem: {
     textDecoration: "none",
-    color: "gold",
+    color: "white",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     cursor: "pointer",
-    textTransform: "uppercase",
-    color: "white"
+    textTransform: "uppercase"
   }
 });
 
@@ -36,6 +35,7 @@ function Carousel() {
 
   useEffect(() => {
     fetchTrendingCoins();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currency]);
 
   const fetchTrendingCoins = async () => {
